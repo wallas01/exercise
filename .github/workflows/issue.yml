@@ -1,0 +1,41 @@
+name: Output Issue Details
+on:
+  issues:
+    types: [opened, edited, reopened]
+  workflow_dispatch:
+jobs:
+  details:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get issue details
+        id: get_issue_details
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const issueDetails = {
+              title: issue.title,
+              body: issue.body,
+              number: issue.number,
+              state: issue.state,
+              created_at: issue.created_at,
+              updated_at: issue.updated_at,
+              user: {
+                login: issue.user.login,
+                id: issue.user.id
+              }
+            };
+            console.log("Issue Details:", JSON.stringify(issueDetails, null, 2));
+            return issueDetails;
+      - name: Output issue details
+        run: |
+          echo "Issue Details:"
+          echo "${{ steps.get_issue_details.outputs.result }}"
+          echo "Issue number: ${{ steps.get_issue_details.outputs.result.number }}"
+          echo "Issue title: ${{ steps.get_issue_details.outputs.result.title }}"
+          echo "Issue state: ${{ steps.get_issue_details.outputs.result.state }}"
+          echo "Created at: ${{ steps.get_issue_details.outputs.result.created_at }}"
+          echo "Updated at: ${{ steps.get_issue_details.outputs.result.updated_at }}"
+          echo "User: ${{ steps.get_issue_details.outputs.result.user.login }} (ID: ${{ steps.get_issue_details.outputs.result.user.id }})"
+          echo "Issue body: ${{ steps.get_issue_details.outputs.result.body }}"
+          echo "For more details, visit: ${{ github.event.issue.html_url }}"
